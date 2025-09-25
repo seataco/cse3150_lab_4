@@ -24,7 +24,6 @@ void write_board_csv(const vector<vector<int>>& board, bool first) {
 }
 
 void print_board(const vector<vector<int>>& board, bool first) {
-    // TODO: implement print_board here
     for (auto& row : board) {
         for (auto& cell : row) {
             cout << cell << " ";
@@ -34,7 +33,6 @@ void print_board(const vector<vector<int>>& board, bool first) {
     write_board_csv(board, first);
 }
 
-// TODO: use algorithms to spawn properly
 void spawn_tile(vector<vector<int>>& board) {
     // Collect all empty positions
     vector<pair<int, int>> empty_positions;
@@ -65,7 +63,6 @@ void spawn_tile(vector<vector<int>>& board) {
 }
 
 
-// TODO: Compress a row, remove zeroes, and then pad with zeroes at the end
 std::vector<int> compress_row(const std::vector<int>& row) {
     vector<int> compressed;
     copy_if(row.begin(), row.end(), back_inserter(compressed), [](int x) { return x != 0; });
@@ -73,19 +70,17 @@ std::vector<int> compress_row(const std::vector<int>& row) {
     return compressed;
 }
 
-// TODO: Merge a row (assumes the row is already compressed)
 std::vector<int> merge_row(std::vector<int> row) {
     for (auto it = row.begin(); it != row.end() - 1; ++it) {
         if (*it == *(it + 1) && *it != 0) {
             *it *= 2;
             *(it + 1) = 0;
-            ++it; // skip next item (zero)
+            ++it;
         }
     }
     return compress_row(row);
 }
 
-// TODO: use copy_if and iterators
 bool move_left(vector<vector<int>>& board){
     bool moved = false;
     for (auto& row : board) {
@@ -97,7 +92,6 @@ bool move_left(vector<vector<int>>& board){
     return moved;
 }
 
-// TODO: use reverse iterators
 bool move_right(vector<vector<int>>& board){
     bool moved = false;
     for (auto& row : board) {
@@ -112,7 +106,24 @@ bool move_right(vector<vector<int>>& board){
 }
     
 // TODO: use column traversal
-bool move_up(vector<vector<int>>& board){return false;}
+bool move_up(vector<vector<int>>& board){
+    bool moved = false;
+    for (int c = 0; c < 4; c++) {
+        vector<int> column(4, 0);
+        for (int r = 0; r < 4; r++) {
+            column[r] = board[r][c];
+        }
+        vector<int> original = column;
+        column = compress_row(column);
+        column = merge_row(column);
+        moved = moved || (column != original);
+
+        for (int r = 0; r < 4; r++) {
+            board[r][c] = column[r];
+        }
+    }
+    return moved;
+}
 // TODO: use column traversal with reverse
 bool move_down(vector<vector<int>>& board){return false;}
 
