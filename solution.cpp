@@ -163,7 +163,10 @@ int main(){
         if (cmd=='q') break;
 
         if (cmd=='u') {
-            // TODO: get the history and print the board and continue
+            if (!history.empty()) {
+                board = history.top();
+                history.pop();
+            }
         }
 
         vector<vector<int>> prev = board;
@@ -174,7 +177,7 @@ int main(){
         else if (cmd=='s') moved=move_down(board);
 
         if (moved) {
-            // TODO: Store the previous state here!
+            history.push(prev);
             spawn_tile(board);
         }
     }
