@@ -125,7 +125,26 @@ bool move_up(vector<vector<int>>& board){
     return moved;
 }
 // TODO: use column traversal with reverse
-bool move_down(vector<vector<int>>& board){return false;}
+bool move_down(vector<vector<int>>& board){
+    bool moved = false;
+    for (int c = 0; c < 4; c++){
+        vector<int> column(4, 0);
+        for (int r = 0; r < 4; r++) {
+            column[r] = board[r][c];
+        }
+        vector<int> original = column;
+        reverse(column.begin(), column.end());
+        column = compress_row(column);
+        column = merge_row(column);
+        reverse(column.begin(), column.end());
+        moved = moved || (column != original);
+
+        for (int r = 0; r < 4; r++) {
+            board[r][c] = column[r];
+        }
+    }
+    return moved;
+}
 
 int main(){
     srand(time(nullptr));
