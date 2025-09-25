@@ -75,7 +75,6 @@ std::vector<int> merge_row(std::vector<int> row) {
         if (*it == *(it + 1) && *it != 0) {
             *it *= 2;
             *(it + 1) = 0;
-            ++it;
         }
     }
     return compress_row(row);
