@@ -104,7 +104,6 @@ bool move_right(vector<vector<int>>& board){
     return moved;
 }
     
-// TODO: use column traversal
 bool move_up(vector<vector<int>>& board){
     bool moved = false;
     for (int c = 0; c < 4; c++) {
@@ -123,7 +122,7 @@ bool move_up(vector<vector<int>>& board){
     }
     return moved;
 }
-// TODO: use column traversal with reverse
+
 bool move_down(vector<vector<int>>& board){
     bool moved = false;
     for (int c = 0; c < 4; c++){
@@ -143,6 +142,17 @@ bool move_down(vector<vector<int>>& board){
         }
     }
     return moved;
+}
+
+template <class Board>
+int compute_score(const Board& board){
+    int score = 0;
+    for (auto& row : board) {
+        for (auto& cell : row) {
+            score += cell;
+        }
+    }
+    return score;
 }
 
 int main(){
