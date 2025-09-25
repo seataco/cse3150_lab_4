@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <algorithm>
+#include <random>
 
 using namespace std;
 
@@ -23,7 +24,6 @@ void write_board_csv(const vector<vector<int>>& board, bool first) {
 }
 
 void print_board(const vector<vector<int>>& board, bool first) {
-    // TODO: implement print_board here
     for (auto& row : board) {
         for (auto& cell : row) {
             cout << cell << " ";
@@ -33,17 +33,36 @@ void print_board(const vector<vector<int>>& board, bool first) {
     write_board_csv(board, first);
 }
 
-// TODO: use algorithms to spawn properly
 void spawn_tile(vector<vector<int>>& board) {
-    for (int r=0;r<4;r++)
-        for (int c=0;c<4;c++)
-            if (board[r][c]==0) { board[r][c]=2; return; }
-    // TODO: Feed this into chat GPT and have it correct the function for you
-    // with proper prompting
+    // Collect all empty positions
+    vector<pair<int, int>> empty_positions;
+    for (int r = 0; r < 4; r++) {
+        for (int c = 0; c < 4; c++) {
+            if (board[r][c] == 0) {
+                empty_positions.push_back({r, c});
+            }
+        }
+    }
+    
+    // If no empty positions, return
+    if (empty_positions.empty()) return;
+    
+    // Random number generation
+    static std::mt19937 rng(std::time(nullptr));
+    std::uniform_int_distribution<int> pos_dist(0, empty_positions.size() - 1);
+    std::uniform_int_distribution<int> value_dist(1, 10);
+    
+    // Select random empty position
+    int random_index = pos_dist(rng);
+    int row = empty_positions[random_index].first;
+    int col = empty_positions[random_index].second;
+    
+    // Assign value: 90% chance for 2, 10% chance for 4
+    int value = (value_dist(rng) <= 9) ? 2 : 4;
+    board[row][col] = value;
 }
 
 
-// TODO: Compress a row, remove zeroes, and then pad with zeroes at the end
 std::vector<int> compress_row(const std::vector<int>& row) {
     vector<int> compressed;
     copy_if(row.begin(), row.end(), back_inserter(compressed), [](int x) { return x != 0; });
@@ -51,19 +70,16 @@ std::vector<int> compress_row(const std::vector<int>& row) {
     return compressed;
 }
 
-// TODO: Merge a row (assumes the row is already compressed)
 std::vector<int> merge_row(std::vector<int> row) {
     for (auto it = row.begin(); it != row.end() - 1; ++it) {
         if (*it == *(it + 1) && *it != 0) {
             *it *= 2;
             *(it + 1) = 0;
-            ++it; // skip next item (zero)
         }
     }
     return compress_row(row);
 }
 
-// TODO: use copy_if and iterators
 bool move_left(vector<vector<int>>& board){
     bool moved = false;
     for (auto& row : board) {
@@ -75,12 +91,59 @@ bool move_left(vector<vector<int>>& board){
     return moved;
 }
 
-// TODO: use reverse iterators
-bool move_right(vector<vector<int>>& board){return false;}
+bool move_right(vector<vector<int>>& board){
+    bool moved = false;
+    for (auto& row : board) {
+        vector<int> original = row;
+        reverse(row.begin(), row.end());
+        row = compress_row(row); 
+        row = merge_row(row);      
+        reverse(row.begin(), row.end());   
+        moved = moved || (row != original);
+    }
+    return moved;
+}
+    
 // TODO: use column traversal
-bool move_up(vector<vector<int>>& board){return false;}
+bool move_up(vector<vector<int>>& board){
+    bool moved = false;
+    for (int c = 0; c < 4; c++) {
+        vector<int> column(4, 0);
+        for (int r = 0; r < 4; r++) {
+            column[r] = board[r][c];
+        }
+        vector<int> original = column;
+        column = compress_row(column);
+        column = merge_row(column);
+        moved = moved || (column != original);
+
+        for (int r = 0; r < 4; r++) {
+            board[r][c] = column[r];
+        }
+    }
+    return moved;
+}
 // TODO: use column traversal with reverse
-bool move_down(vector<vector<int>>& board){return false;}
+bool move_down(vector<vector<int>>& board){
+    bool moved = false;
+    for (int c = 0; c < 4; c++){
+        vector<int> column(4, 0);
+        for (int r = 0; r < 4; r++) {
+            column[r] = board[r][c];
+        }
+        vector<int> original = column;
+        reverse(column.begin(), column.end());
+        column = compress_row(column);
+        column = merge_row(column);
+        reverse(column.begin(), column.end());
+        moved = moved || (column != original);
+
+        for (int r = 0; r < 4; r++) {
+            board[r][c] = column[r];
+        }
+    }
+    return moved;
+}
 
 int main(){
     srand(time(nullptr));
@@ -100,7 +163,10 @@ int main(){
         if (cmd=='q') break;
 
         if (cmd=='u') {
-            // TODO: get the history and print the board and continue
+            if (!history.empty()) {
+                board = history.top();
+                history.pop();
+            }
         }
 
         vector<vector<int>> prev = board;
@@ -111,7 +177,7 @@ int main(){
         else if (cmd=='s') moved=move_down(board);
 
         if (moved) {
-            // TODO: Store the previous state here!
+            history.push(prev);
             spawn_tile(board);
         }
     }
