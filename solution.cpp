@@ -76,7 +76,19 @@ bool move_left(vector<vector<int>>& board){
 }
 
 // TODO: use reverse iterators
-bool move_right(vector<vector<int>>& board){return false;}
+bool move_right(vector<vector<int>>& board){
+    bool moved = false;
+    for (auto& row : board) {
+        vector<int> original = row;
+        reverse(row.begin(), row.end());
+        row = compress_row(row); 
+        row = merge_row(row);      
+        reverse(row.begin(), row.end());   
+        moved = moved || (row != original);
+    }
+    return moved;
+}
+    
 // TODO: use column traversal
 bool move_up(vector<vector<int>>& board){return false;}
 // TODO: use column traversal with reverse
