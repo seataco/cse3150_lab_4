@@ -1,0 +1,7 @@
+._*
+env/
+.pytest_cache/
+__pycache__/
+cse3150_week_4_lab_and_hw.pdf
+game_output.csv
+solution
