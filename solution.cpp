@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <algorithm>
+#include <random>
 
 using namespace std;
 
@@ -35,11 +36,32 @@ void print_board(const vector<vector<int>>& board, bool first) {
 
 // TODO: use algorithms to spawn properly
 void spawn_tile(vector<vector<int>>& board) {
-    for (int r=0;r<4;r++)
-        for (int c=0;c<4;c++)
-            if (board[r][c]==0) { board[r][c]=2; return; }
-    // TODO: Feed this into chat GPT and have it correct the function for you
-    // with proper prompting
+    // Collect all empty positions
+    vector<pair<int, int>> empty_positions;
+    for (int r = 0; r < 4; r++) {
+        for (int c = 0; c < 4; c++) {
+            if (board[r][c] == 0) {
+                empty_positions.push_back({r, c});
+            }
+        }
+    }
+    
+    // If no empty positions, return
+    if (empty_positions.empty()) return;
+    
+    // Random number generation
+    static std::mt19937 rng(std::time(nullptr));
+    std::uniform_int_distribution<int> pos_dist(0, empty_positions.size() - 1);
+    std::uniform_int_distribution<int> value_dist(1, 10);
+    
+    // Select random empty position
+    int random_index = pos_dist(rng);
+    int row = empty_positions[random_index].first;
+    int col = empty_positions[random_index].second;
+    
+    // Assign value: 90% chance for 2, 10% chance for 4
+    int value = (value_dist(rng) <= 9) ? 2 : 4;
+    board[row][col] = value;
 }
 
 
